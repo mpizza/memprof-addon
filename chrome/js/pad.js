@@ -97,6 +97,7 @@ function getMousePos(canvas, evt) {
       var traceCount = this.tracePool.length;
       // setup width
       if (traceCount > 0) {
+        this._elements.pad.style.width = '90%';
         if (traceCount > this.limit) {
           traceCount = this.limit;
           this.minimizeTracePool();

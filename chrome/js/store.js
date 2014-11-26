@@ -8,18 +8,7 @@ function escapeHtml(html){
 
 (function(exports) {
   function Store() {
-    this.names = null;
-    this.traces = null;
-    this.allocated = null;
-    this.originAllocated = null;
-    this.treeData = {};
-    // all data
-    this.uniData = [];
-    // for filter
-    this.filterCount = 0;
-    this.lookupList = {};
-    this.filterNodes = [];
-
+    this.initData();
     this.init();
   }
 
@@ -27,11 +16,13 @@ function escapeHtml(html){
     init: function s_init() {
       window.addEventListener('search', this);
       window.addEventListener('subset-allocated', this);
+      window.addEventListener('reset-record', this);
     },
 
     stop: function s_stop() {
       window.removeEventListener('search', this);
       window.removeEventListener('subset-allocated', this);
+      window.removeEventListener('reset-record', this);
     },
 
     handleEvent: function s_handleEvent(evt) {
@@ -40,7 +31,10 @@ function escapeHtml(html){
           console.log(evt.detail.term.length);
           break;
         case 'subset-allocated':
-          this.handleSubetAllocated(evt);
+          this.handleSubsetAllocated(evt);
+          break;
+        case 'reset-record':
+          this.initData();
           break;
       }
     },
@@ -51,19 +45,27 @@ function escapeHtml(html){
       this.originAllocated = allocated;
       // generate this.allocated
       this.subsetAllocated(0, this.originAllocated.length);
+      console.log('pizza:' + this.names.length);
       this.preprocessData();
       // notify others data is ready
       window.dispatchEvent(new CustomEvent('dataReady'));
     },
 
-    drop: function s_drop() {
+    initData: function s_initData() {
       this.names = null;
       this.traces = null;
       this.allocated = null;
-      this.uniData = null;
+      this.originAllocated = null;
+      this.treeData = {};
+      // all data
+      this.uniData = [];
+      // for filter
+      this.filterCount = 0;
+      this.lookupList = {};
+      this.filterNodes = [];
     },
 
-    handleSubetAllocated: function s_handleSubetAllocated(evt) {
+    handleSubsetAllocated: function s_handleSubsetAllocated(evt) {
       this.subsetAllocated(evt.detail.startPoint, evt.detail.endPoint);
       if (this.allocated.length > 0) {
         // notify others data is ready
